@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>To-Do List</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen font-sans">
+    <div class="max-w-2xl mx-auto px-4 py-8">
+
+        <h1 class="text-3xl font-bold mb-6">📝 To-Do List</h1>
+
+        <form method="POST" class="flex flex-wrap gap-3 mb-8 bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+            <input type="text" id="title" name="title" required
+                   placeholder="Task title"
+                   class="flex-1 min-w-[150px] bg-white border border-slate-300 rounded px-3 py-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+            <select id="priority" name="priority"
+                    class="bg-white border border-slate-300 rounded px-3 py-2 text-slate-900">
+                <option value="LOW">Low</option>
+                <option value="MEDIUM" selected>Medium</option>
+                <option value="HIGH">High</option>
+            </select>
+
+            <input type="date" id="due_date" name="due_date"
+                   class="bg-white border border-slate-300 rounded px-3 py-2 text-slate-900">
+
+            <button type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded transition-colors">
+                Add Task
+            </button>
+        </form>
+
+        <form method="GET" class="flex flex-wrap items-center gap-4 mb-6 bg-white p-3 rounded-lg shadow-sm border border-slate-200 text-sm">
+            <div class="flex items-center gap-2">
+                <label for="status" class="text-slate-400">Status:</label>
+                <select name="status" id="status" onchange="this.form.submit()"
+                        class="bg-white border border-slate-300 rounded px-2 py-1 text-slate-900">
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All</option>
+                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                    <option value="done" {% if status_filter == 'done' %}selected{% endif %}>Done</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+                <label for="sort" class="text-slate-400">Sort by:</label>
+                <select name="sort" id="sort" onchange="this.form.submit()"
+                        class="bg-white border border-slate-300 rounded px-2 py-1 text-slate-900">
+                    <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>Created</option>
+                    <option value="due_date" {% if sort_by == 'due_date' %}selected{% endif %}>Due</option>
+                    <option value="priority" {% if sort_by == 'priority' %}selected{% endif %}>Priority</option>
+                </select>
+            </div>
+            <div class="flex items-center gap-2">
+            <label for="order" class="text-slate-400">Order:</label>
+            <select name="order" id="order" onchange="this.form.submit()"
+                    class="bg-white border border-slate-300 rounded px-2 py-1 text-slate-900">
+                <option value="desc" {% if order == 'desc' %}selected{% endif %}>Descending</option>
+                <option value="asc" {% if order == 'asc' %}selected{% endif %}>Ascending</option>
+            </select>
+                </div>
+        </form>
+
+        <ul class="space-y-3">
+          {% for task in tasks %}
+            <li class="flex flex-wrap items-center gap-3 bg-white p-4 rounded-lg shadow-sm border border-slate-200 {% if task.is_done %}opacity-60{% endif %}">
+
+                <span class="flex-1 min-w-[150px] {% if task.is_done %}line-through text-slate-400{% else %}text-slate-900{% endif %}">
+                    {{ task.title }}
+                </span>
+
+                <span class="text-xs font-semibold px-2 py-1 rounded-full
+                    {% if task.priority_name == 'HIGH' %}bg-red-100 text-red-700
+                    {%elif task.priority_name == 'MEDIUM' %}bg-yellow-100 text-yellow-700
+                    {% else %}bg-green-100 text-green-700{% endif %}">
+                    {{ task.priority_name }}
+                </span>
+
+                {% if task.due_date %}
+                <span class="text-sm text-slate-500">
+                    📅{{ task.due_date.strftime('%d.%m.%Y') }}
+                </span>
+                {% endif %}
+
+                <div class="flex gap-2 ml-auto">
+                    <form method="POST" action="{{ url_for('complete_task', task_id=task.id) }}">
+                        <button type="submit"
+                                class="text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1 rounded transition-colors">
+                                ✓ Done
+                        </button>
+                    </form>
+                    <a href="{{ url_for('edit_task', task_id=task.id) }}"
+                       class="text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 px-2 py-1 rounded transition-colors">
+                        Edit
+                    </a>
+                    <form method="POST" action="{{ url_for('delete_task', task_id=task.id) }}">
+                        <button type="submit"
+                                class="text-sm bg-red-50 hover:bg-red-100 text-red-700 px-3 py-1 rounded transition-colors">
+                            Delete
+                        </button>
+                    </form>
+                </div>
+            </li>
+          {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>
