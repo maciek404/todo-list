@@ -1,1 +1,5 @@
 @import "tailwindcss";
+
+@theme {
+    --font-heading: "Space Grotesk", sans-serif;
+}
