@@ -1,5 +1,5 @@
 from flask import Flask, render_template, redirect, request, url_for
-from database import db, Task, Priority
+from database import db, Task, Priority, Status
 from datetime import date
 
 app = Flask(__name__)
@@ -13,13 +13,16 @@ with app.app_context():
 @app.route('/', methods=['GET', 'POST'])
 def home():
     if request.method == 'POST':
-        title = request.form.get('title').strip()
+        title = request.form.get('title', '').strip()
         priority_str = request.form.get('priority')
         due_date_str = request.form.get('due_date')
+        description = request.form.get('description', '').strip()
         if title:
             due_date = date.fromisoformat(due_date_str) if due_date_str else None
+            description = description or None
             new_task = Task(
                 title=title,
+                description=description,
                 priority=Priority[priority_str].value,
                 due_date=due_date,
             )
@@ -27,34 +30,23 @@ def home():
             db.session.commit()
         return redirect(url_for('home'))
 
-    status_filter = request.args.get('status', 'all')
     sort_by = request.args.get('sort', 'created_at')
     order = request.args.get('order', 'asc')
 
-    query = Task.query
-    if status_filter == 'active':
-        query = query.filter_by(is_done=False)
-    elif status_filter == 'done':
-        query = query.filter_by(is_done=True)
-
     sort_column = getattr(Task, sort_by)
     sort_column = sort_column.desc() if order == 'desc' else sort_column.asc()
-    query = query.order_by(sort_column)
-    tasks = query.all()
+
+    def tasks_by_status(status):
+        return Task.query.filter_by(status=status).order_by(sort_column).all()
+
     return render_template(
         'index.html',
-        tasks=tasks,
+        tasks_todo=tasks_by_status(Status.TODO.value),
+        tasks_in_progress=tasks_by_status(Status.IN_PROGRESS.value),
+        tasks_done=tasks_by_status(Status.DONE.value),
         sort_by=sort_by,
         order=order,
-        status_filter=status_filter,
     )
-
-@app.route('/complete/<int:task_id>', methods=['POST'])
-def complete_task(task_id):
-    current_task = db.get_or_404(Task, task_id)
-    current_task.is_done = not current_task.is_done
-    db.session.commit()
-    return redirect(url_for('home'))
 
 @app.route('/delete/<int:task_id>', methods=['POST'])
 def delete_task(task_id):
@@ -77,6 +69,17 @@ def edit_task(task_id):
             db.session.commit()
             return redirect(url_for('home'))
     return render_template('edit.html', task=current_task)
+
+@app.route('/move/<int:task_id>/<string:direction>', methods=['POST'])
+def move_task(task_id, direction):
+    current_task = db.get_or_404(Task, task_id)
+    if direction == 'next' and current_task.status != Status.DONE.value:
+        current_task.status += 1
+        db.session.commit()
+    elif direction == 'prev' and current_task.status != Status.TODO.value:
+        current_task.status -= 1
+        db.session.commit()
+    return redirect(url_for('home'))
 
 if __name__ == '__main__':
     app.run(debug=True)
