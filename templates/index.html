@@ -65,7 +65,7 @@
                 <h2 class="font-heading font-semibold text-lg mb-4">To Do</h2>
                 <ul class="space-y-3">
                     {% for task in tasks_todo %}
-                        {{ task_card(task) }}
+                        {{ task_card(task, sort_by, order) }}
                     {% endfor %}
                 </ul>
             </div>
@@ -74,7 +74,7 @@
                 <h2 class="font-heading font-semibold text-lg mb-4">In Progress</h2>
                 <ul class="space-y-3">
                     {% for task in tasks_in_progress %}
-                        {{ task_card(task) }}
+                        {{ task_card(task, sort_by, order) }}
                     {% endfor %}
                 </ul>
             </div>
@@ -83,7 +83,7 @@
                 <h2 class="font-heading font-semibold text-lg mb-4">Done</h2>
                 <ul class="space-y-3">
                     {% for task in tasks_done %}
-                        {{ task_card(task) }}
+                        {{ task_card(task, sort_by, order) }}
                     {% endfor %}
                 </ul>
             </div>

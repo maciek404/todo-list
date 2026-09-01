@@ -58,20 +58,28 @@ def delete_task(task_id):
 @app.route('/edit/<int:task_id>', methods=['GET', 'POST'])
 def edit_task(task_id):
     current_task = db.get_or_404(Task, task_id)
+    sort_by = request.form.get('sort')
+    order = request.form.get('order')
     if request.method == 'POST':
         title = request.form.get('title').strip()
+        description = request.form.get('description', '').strip()
         if title:
             priority = request.form.get('priority')
             due_date = request.form.get('due_date')
             current_task.title = title
+            current_task.description = description or None
             current_task.priority = Priority[priority].value
             current_task.due_date = date.fromisoformat(due_date) if due_date else None
             db.session.commit()
-            return redirect(url_for('home'))
-    return render_template('edit.html', task=current_task)
+            return redirect(url_for('home', sort=sort_by, order=order))
+    sort_by = request.args.get('sort', 'created_at')
+    order = request.args.get('order', 'asc')
+    return render_template('edit.html', task=current_task, sort=sort_by, order=order)
 
 @app.route('/move/<int:task_id>/<string:direction>', methods=['POST'])
 def move_task(task_id, direction):
+    sort_by = request.args.get('sort', 'created_at')
+    order = request.args.get('order', 'asc')
     current_task = db.get_or_404(Task, task_id)
     if direction == 'next' and current_task.status != Status.DONE.value:
         current_task.status += 1
@@ -79,7 +87,7 @@ def move_task(task_id, direction):
     elif direction == 'prev' and current_task.status != Status.TODO.value:
         current_task.status -= 1
         db.session.commit()
-    return redirect(url_for('home'))
+    return redirect(url_for('home', sort=sort_by, order=order))
 
 if __name__ == '__main__':
     app.run(debug=True)
