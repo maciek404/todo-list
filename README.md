@@ -1,6 +1,6 @@
 # To-Do List App
 
-A Kanban-style to-do list web application built with Flask and styled with Tailwind CSS. Tasks are organized into three columns — To Do, In Progress, and Done — and can be created, edited, moved between columns, and deleted. Each task can have a priority, an optional due date, and an optional description.
+A Kanban-style to-do list web application built with Flask and styled with Tailwind CSS. Tasks are organized into three columns — To Do, In Progress, and Done — and can be created, edited, moved between columns, and deleted. Each task can have a priority, an optional due date, and an optional description. The app also includes a second, playful visual theme that can be toggled live, styled like a handwritten notebook page.
 
 ## Features
 
@@ -11,16 +11,19 @@ A Kanban-style to-do list web application built with Flask and styled with Tailw
 - Optional due date per task
 - Optional description, shown as a truncated two-line preview on the card and in full on the edit form
 - Sort tasks by creation date, due date, or priority, in ascending or descending order — the chosen sort is preserved across moving, editing, and navigating back to the board
+- Two visual themes, switchable live with a single button:
+  - **Modern:** a clean, light Tailwind UI with a custom heading font
+  - **Notebook:** a handwritten-style theme with ruled paper lines, a red margin line, and tape-accented task cards, color-coded by priority
+  - The selected theme is saved in the browser's local storage, so it persists across page reloads and navigation
 - Responsive layout: columns stack vertically on small screens and sit side by side on larger ones
-- Clean UI built with Tailwind CSS and a custom heading font
 
 ## Tech Stack
 
 - **Backend:** Python, Flask
 - **Database:** SQLite, accessed via Flask-SQLAlchemy (SQLAlchemy ORM)
 - **Templating:** Jinja2, with a reusable macro for task cards
-- **Styling:** Tailwind CSS v4 (compiled via the Tailwind CLI), Google Fonts (Space Grotesk)
-- **Frontend:** Server-rendered HTML with plain forms (no JavaScript framework, no Flask-WTF)
+- **Styling:** Tailwind CSS v4 (compiled via the Tailwind CLI), Google Fonts (Space Grotesk, Short Stack), plain CSS for the notebook theme (CSS gradients, pseudo-elements, and attribute selectors layered on top of Tailwind)
+- **Frontend:** Server-rendered HTML with plain forms (no JavaScript framework, no Flask-WTF); a small vanilla JavaScript snippet handles the theme toggle and local storage
 
 ## Project Structure
 
@@ -32,7 +35,7 @@ A Kanban-style to-do list web application built with Flask and styled with Tailw
 ├── package.json                 # Node dependencies (Tailwind CSS)
 ├── static/
 │   └── css/
-│       ├── input.css            # Tailwind entry file
+│       ├── input.css            # Tailwind entry file + notebook theme overrides
 │       └── output.css           # Compiled CSS (committed for convenience)
 └── templates/
     ├── index.html                # Board view: add form, sorting, three columns
@@ -95,6 +98,10 @@ Each task has the following fields:
 - `due_date` — optional due date
 - `created_at` — timestamp set automatically when the task is created
 
+## How the Theme Toggle Works
+
+The two visual themes share the exact same HTML and Jinja templates — no routes, models, or markup are duplicated. A `data-theme` attribute on the `<html>` element switches between `"modern"` (default) and `"corkboard"` (the notebook-paper theme), and CSS attribute selectors in `input.css` apply an entirely different look whenever the notebook theme is active. A small JavaScript snippet toggles the attribute and stores the choice in `localStorage`, so the theme is remembered across full-page reloads, which this app relies on for nearly every action (adding, moving, sorting, and editing tasks all trigger a server round-trip).
+
 ## Notes
 
-This project was built as a learning exercise, following a classic Flask request/response cycle (form submissions with page reloads, no AJAX). It intentionally uses plain HTML forms instead of Flask-WTF, and a hand-rolled board layout instead of a JavaScript drag-and-drop library, to focus on core request handling, template composition, and state management (such as preserving the active sort order across page redirects) using only server-rendered HTML.
+This project was built as a learning exercise, following a classic Flask request/response cycle (form submissions with page reloads, no AJAX). It intentionally uses plain HTML forms instead of Flask-WTF, and a hand-rolled board layout instead of a JavaScript drag-and-drop library, to focus on core request handling, template composition, and state management (such as preserving the active sort order and visual theme across page redirects) using server-rendered HTML and a minimal amount of vanilla JavaScript.

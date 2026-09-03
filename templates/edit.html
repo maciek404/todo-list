@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="modern">
 <head>
     <meta charset="UTF-8">
     <title>Edit Task</title>
@@ -7,40 +7,41 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Short+Stack&display=swap" rel="stylesheet">
 </head>
 <body class="bg-slate-50 text-slate-900 min-h-screen font-sans">
     <div class="max-w-6xl mx-auto px-4 py-8">
-        <header class="mb-8 pb-4 border-b border-slate-200 flex items-center justify-between">
+        <header class="site-header mb-8 pb-4 border-b border-slate-200 flex items-start justify-between">
             <div>
                 <h1 class="font-heading text-4xl font-bold tracking-tight">Edit Task</h1>
                 <p class="text-slate-500 mt-1">{{ task.title }}</p>
             </div>
             <a href="{{url_for('home', sort=sort, order=order) }}"
-               class="text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-6 rounded transition-colors">
+               class="btn-tape text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded transition-colors">
                 ← Back to Tasks
             </a>
         </header>
-        <form method="POST" class="flex flex-wrap gap-3 mb-8 bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+        <form method="POST" class="form-card flex flex-wrap gap-3 mb-8 bg-white p-4 rounded-lg shadow-sm border border-slate-200">
             <input type="text" id="title" name="title" value="{{ task.title }}" required
-                   class="flex-1 min-w-[150px] bg-white border border-slate-300 rounded px-3 py-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                   class="input-paper flex-1 min-w-[150px] bg-white border border-slate-300 rounded px-3 py-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
             <select id="priority" name="priority"
-                    class="bg-white border border-slate-300 rounded px-3 py-2 text-slate-900">
+                    class="input-paper bg-white border border-slate-300 rounded px-3 py-2 text-slate-900">
                 <option value="LOW" {% if task.priority == 0 %}selected{% endif %}>Low</option>
                 <option value="MEDIUM" {% if task.priority == 1 %}selected{% endif %}>Medium</option>
                 <option value="HIGH" {% if task.priority == 2 %}selected{% endif %}>High</option>
             </select>
             <input type="date" id="due_date" name="due_date" {% if task.due_date %}value="{{ task.due_date }}"{% endif %}
-                   class="bg-white border border-slate-300 rounded px-3 py-2 text-slate-900">
+                   class="input-paper bg-white border border-slate-300 rounded px-3 py-2 text-slate-900">
             <button type="submit"
-                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded transition-colors">
+                    class="btn-primary-paper bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded transition-colors">
                 Save Changes
             </button>
-            <textarea name="description" rows="2"
-                      class="bg-white border border-slate-300 rounded px-3 py-2 w-full text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ task.description or '' }}</textarea>
+            <textarea name="description" rows="1"
+                      class="input-paper bg-white border border-slate-300 rounded px-3 py-2 w-full text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500">{{ task.description or 'Description (optional)' }}</textarea>
             <input type="hidden" name="sort" value="{{ sort }}">
             <input type="hidden" name="order" value="{{ order }}">
         </form>
-        <footer class="mt-12 pt-6 border-t border-slate-200 text-center text-sm text-slate-500">
+        <footer class="site-footer mt-12 pt-6 border-t border-slate-200 text-center text-sm text-slate-500">
             <p>
                 Made with Flask & Tailwind CSS ·
                 <a href="https://github.com/maciek404/todo-list"
@@ -51,5 +52,19 @@
             </p>
         </footer>
     </div>
+<script>
+    function toggleTheme() {
+        const html = document.documentElement;
+        const isCorkboard = html.getAttribute('data-theme') == 'corkboard';
+        const newTheme = isCorkboard ? 'modern' : 'corkboard';
+        html.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+    }
+
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    }
+</script>
 </body>
 </html>
